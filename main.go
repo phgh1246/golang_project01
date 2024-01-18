@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/phgh1246/golang_project01/api"
+	"github.com/phgh1246/golang_project01/api/middleware"
 	"github.com/phgh1246/golang_project01/db"
 )
 
@@ -40,10 +41,16 @@ func main() {
 		}
 		userHandler  = api.NewUserHandler(userStore)
 		hotelHandler = api.NewHotelHandler(store)
+		authHandler  = api.NewAuthHandler(userStore)
 		app          = fiber.New(config)
-		apiv1        = app.Group("/api/v1")
+		auth         = app.Group("/api")
+		apiv1        = app.Group("/api/v1", middleware.JWTAuthentication)
 	)
 
+	// auth
+	auth.Post("/auth", authHandler.HandleAuthenticate)
+
+	// Versioned API routes
 	// user handlers
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
 	apiv1.Delete("/user/:id", userHandler.HandleDeleteUser)
@@ -52,8 +59,8 @@ func main() {
 	apiv1.Get("/user/:id", userHandler.HandleGetUser)
 
 	// hotel handlers
-	apiv1.Get("/hotel/", hotelHandler.HandleGetHotels)
-	apiv1.Get("/hotel/:id/", hotelHandler.HandleGetHotel)
-	apiv1.Get("/hotel/:id/rooms/", hotelHandler.HandleGetRooms)
+	apiv1.Get("/hotel", hotelHandler.HandleGetHotels)
+	apiv1.Get("/hotel/:id", hotelHandler.HandleGetHotel)
+	apiv1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 	app.Listen(*listenAddr)
 }

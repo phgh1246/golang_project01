@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,8 +16,25 @@ var (
 	client     *mongo.Client
 	roomStore  db.RoomStore
 	hotelStore db.HotelStore
+	userStore  db.UserStore
 	ctx        = context.Background()
 )
+
+func seedUser(firstName, lastName, email string) {
+	user, err := types.NewUserFromParams(types.CreateUserParams{
+		Email:     email,
+		FirstName: firstName,
+		LastName:  lastName,
+		Password:  "defaultseedpassword",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = userStore.InsertUser(ctx, user)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func seedHotel(name, location string, rating int) {
 	hotel := types.Hotel{
@@ -51,15 +67,12 @@ func seedHotel(name, location string, rating int) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(insertedHotel)
-
 	for _, room := range rooms {
 		room.HotelID = insertedHotel.ID
-		insertedRoom, err := roomStore.InsertRoom(ctx, &room)
+		_, err := roomStore.InsertRoom(ctx, &room)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(insertedRoom)
 	}
 }
 
@@ -67,6 +80,10 @@ func main() {
 	seedHotel("Fancy Hotel", "Down The Street", 4)
 	seedHotel("Classy Hotel", "Down The Lane", 5)
 	seedHotel("Shoddy Hotel", "Down The Alley", 2)
+
+	seedUser("Alice", "Names", "alice@emails.com")
+	seedUser("Bob", "Named", "bob@emails.co")
+	seedUser("Charlie", "Nameless", "charlie@emails.org")
 }
 
 func init() {
@@ -80,4 +97,5 @@ func init() {
 	}
 	hotelStore = db.NewMongoHotelStore(client)
 	roomStore = db.NewMongoRoomStore(client, hotelStore)
+	userStore = db.NewMongoUserStore(client)
 }
