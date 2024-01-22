@@ -9,3 +9,6 @@ seed:
 
 test:
 	@go test -v ./...
+
+testauth:
+	@go test -v -run TestAuthenticate ./api
