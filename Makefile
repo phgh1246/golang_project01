@@ -12,3 +12,6 @@ test:
 
 testauth:
 	@go test -v -run TestAuthenticate ./api
+
+testbooking:
+	@go test -v -run TestAdminGetBookings ./api
