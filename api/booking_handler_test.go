@@ -10,7 +10,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/phgh1246/golang_project01/api/middleware"
 	"github.com/phgh1246/golang_project01/db/fixtures"
 	"github.com/phgh1246/golang_project01/types"
 )
@@ -31,8 +30,8 @@ func TestUserGetBooking(t *testing.T) {
 			time.Now().AddDate(0, 0, 1),
 			time.Now().AddDate(0, 0, 4),
 		)
-		app            = fiber.New()
-		route          = app.Group("/", middleware.JWTAuthentication(db.User))
+		app            = fiber.New(fiber.Config{ErrorHandler: ErrorHandler})
+		route          = app.Group("/", JWTAuthentication(db.User))
 		bookingHandler = NewBookingHandler(db.Store)
 	)
 	route.Get("/:id", bookingHandler.HandleGetBooking)
@@ -49,7 +48,6 @@ func TestUserGetBooking(t *testing.T) {
 	if err := json.NewDecoder(resp.Body).Decode(&bookingResp); err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(bookingResp)
 	if bookingResp.ID != booking.ID {
 		t.Fatalf("expected ID %s, got ID %s", booking.ID, bookingResp.ID)
 	}
@@ -85,8 +83,8 @@ func TestAdminGetBookings(t *testing.T) {
 			time.Now().AddDate(0, 0, 1),
 			time.Now().AddDate(0, 0, 4),
 		)
-		app            = fiber.New()
-		admin          = app.Group("/", middleware.JWTAuthentication(db.User), middleware.AdminAuth)
+		app            = fiber.New(fiber.Config{ErrorHandler: ErrorHandler})
+		admin          = app.Group("/", JWTAuthentication(db.User), AdminAuth)
 		bookingHandler = NewBookingHandler(db.Store)
 	)
 	_ = booking
@@ -123,7 +121,7 @@ func TestAdminGetBookings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.StatusCode == http.StatusOK {
-		t.Fatal("got status code 200 when expecting failure")
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("expected status code unauthorized but got %d", resp.StatusCode)
 	}
 }
