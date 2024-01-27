@@ -40,7 +40,7 @@ func NewRoomHandler(store *db.Store) *RoomHandler {
 }
 
 func (h *RoomHandler) HandleGetRooms(c *fiber.Ctx) error {
-	rooms, err := h.store.Room.GetRooms(c.Context(), bson.M{})
+	rooms, err := h.store.Room.GetRooms(c.Context(), db.DataMap{})
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (h *RoomHandler) isRoomAvailableForBooking(
 	roomID primitive.ObjectID,
 	params BookRoomParams,
 ) (bool, error) {
-	filter := bson.M{
+	filter := db.DataMap{
 		"roomID": roomID,
 		"fromDate": bson.M{
 			"$gte": params.FromDate,

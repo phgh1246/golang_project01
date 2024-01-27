@@ -33,7 +33,7 @@ func setup(t *testing.T) *testdb {
 		log.Fatal(err)
 	}
 	hotelStore := db.NewMongoHotelStore(client)
-	return &testdb{
+	tdb := &testdb{
 		client: client,
 		Store: &db.Store{
 			Hotel:   hotelStore,
@@ -42,4 +42,8 @@ func setup(t *testing.T) *testdb {
 			Booking: db.NewMongoBookingStore(client),
 		},
 	}
+
+	tdb.teardown(t)
+
+	return tdb
 }

@@ -4,8 +4,6 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/phgh1246/golang_project01/db"
@@ -35,14 +33,10 @@ func (h *UserHandler) HandlePutUser(c *fiber.Ctx) error {
 		params types.UpdateUserParams
 		userID = c.Params("id")
 	)
-	oid, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return ErrorInvalidID()
-	}
 	if err := c.BodyParser(&params); err != nil {
 		return ErrorBadRequest()
 	}
-	filter := bson.M{"_id": oid}
+	filter := db.DataMap{"_id": userID}
 	if err := h.userStore.UpdateUser(c.Context(), filter, params); err != nil {
 		return err
 	}
