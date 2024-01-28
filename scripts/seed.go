@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -74,4 +75,14 @@ func main() {
 
 	hotel = fixtures.AddHotel(store, "Shoddy Hotel", "Down The Alley", 2, nil)
 	addRoomsToHotel(hotel.ID, userIDs)
+
+	for i := 0; i < 100; i++ {
+		fixtures.AddHotel(
+			store,
+			fmt.Sprintf("Cloned Hotel %d", i),
+			fmt.Sprintf("In Parallel Universe %d", i),
+			rand.Intn(5)+1,
+			nil,
+		)
+	}
 }
